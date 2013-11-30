@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Music and Memory Integration Demo</title>
+</head>
+<body>
+    <form action="http://192.168.0.194:8080/library/upload" method="post" enctype="multipart/form-data">
+        <div class="title">Create Library</div>
+        <div>
+            <label>Administrator Name:</label>
+            <input type="text" name="user">
+        </div>
+        <div>
+            <label>Library Name:</label>
+            <input type="text" name="library">
+        </div>
+        <div>
+            <label>iTunes Library.xml</label>
+            <input type="file" name="data">
+        </div>
+        <div>
+            <button type="submit">Create Library</button>
+        </div>
+    </form>
+    <hr>
+    <form action="http://192.168.0.194:8080/patient/new" method="post">
+        <div class="title">Register Patient</div>
+        <div>
+            <label>Caretaker Name:</label>
+            <input type="text" name="user">
+        </div>
+        <div>
+            <label>Patient Name:</label>
+            <input type="text" name="patient">
+        </div>
+        <div>
+            <button type="submit">Register Patient</button>
+        </div>
+    </form>
+    <hr>
+    <form action="http://192.168.0.194:8080/library" method="get">
+        <div class="title">Find Library</div>
+        <div>
+            <label>Search:</label>
+            <input type="search" name="q">
+        </div>
+        <div>
+            <button type="submit">Find Library</button>
+        </div>
+    </form>
+</body>
+</html>
