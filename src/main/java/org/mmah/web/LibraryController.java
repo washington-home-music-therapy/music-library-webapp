@@ -1,10 +1,10 @@
 package org.mmah.web;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import itunes_parser.itunes.MusicLibrary;
-import org.mmah.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +14,13 @@ import itunes_parser.ITunes;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -29,7 +32,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @Controller
 @RequestMapping("/library")
 public class LibraryController {
-    private final ConcurrentHashMap<String,MusicLibrary> libraryStore = new ConcurrentHashMap<String, MusicLibrary>();
+    private final BiMap<String,Long> libraryIds = Maps.synchronizedBiMap(HashBiMap.<String,Long>create());
+    private final ConcurrentHashMap<Long,MusicLibrary> libraryStore = new ConcurrentHashMap<Long, MusicLibrary>();
+
+    @Autowired
+    private File dataDir;
+
+    private List<String> libraryColumns = ImmutableList.of("genre", "year", "grouping", "artist", "album", "trackNumber", "name");
+
+    @Autowired
+    private Random random;
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @ResponseBody
@@ -39,43 +51,114 @@ public class LibraryController {
                               @RequestParam MultipartFile data) throws IOException {
         // TODO exception resolver
 
-        File tempFile = File.createTempFile(data.getOriginalFilename(),"mmah.temp");
-        data.transferTo(tempFile);
-
-        ITunes itReader = new ITunes("genre", "year", "grouping", "artist", "album", "trackNumber", "name");
+        ITunes itReader = new ITunes(); // not displaying columns
         MusicLibrary parsedLibrary = null;
         try {
-            parsedLibrary = itReader.read(tempFile);
+            parsedLibrary = itReader.read(data.getInputStream());
         } catch (XMLStreamException e) {
             // TODO move to errors directory, email karl
             // TODO error checksum
             return "There was an error parsing your library, the development team has been notified. Please wait for an email before resubmitting.";
         }
 
-        libraryStore.put(libraryKey(user,library),parsedLibrary);
+        long uid = createId();
+
+        File storageFile = getLibraryFile(uid);
+        data.transferTo(storageFile);
+
+        libraryIds.put(libraryKey(user,library),uid);
+        libraryStore.put(uid,parsedLibrary);
 
         // look up or generate account and library ids, validate file and present link
-        return MessageFormat.format("Library for {0} named {1} stored, {2} tracks, {3} playlists",
+        return MessageFormat.format("Library for {0} named {1} stored, {2} tracks, {3} playlists -- id {4}",
                 user,
                 library,
                 parsedLibrary.getTracks().size(),
-                parsedLibrary.getPlaylists().size());
+                parsedLibrary.getPlaylists().size(),
+                uid);
     }
 
     private String libraryKey(String user, String library) {
         return user + "%%" + library;
     }
 
+    private long createId() throws IOException {
+        File libraryFile;
+        long uid;
+        do {
+            uid = Math.abs(random.nextLong());
+            libraryFile = getLibraryFile(uid);
+        } while(libraryFile.exists());
+        libraryFile.createNewFile();
+        return uid;
+    }
+
+    private File getLibraryFile(long id) {
+        return new File(dataDir,id + ".xml");
+    }
+
     @RequestMapping("/{libraryId:\\d+}/")
     @ResponseBody
-    public String viewLibrary(@PathVariable long libraryId) {
-        return "library view, library: " + libraryId;
+    public String viewLibrary(@PathVariable long libraryId) throws FileNotFoundException, XMLStreamException {
+        MusicLibrary parsedLibrary = libraryStore.get(libraryId);
+        if(parsedLibrary == null) {
+            File storageFile = getLibraryFile(libraryId);
+            ITunes itReader = new ITunes(); // not displaying columns
+            parsedLibrary = itReader.read(storageFile);
+        }
+
+        String key = libraryIds.inverse().get(libraryId);
+
+        String user = "unknown";
+        String library = "unknown";
+
+        if(key != null) {
+            String[] params = key.split("%%");
+            user = params[0];
+            library = params[1];
+        }
+
+        // look up or generate account and library ids, validate file and present link
+        return MessageFormat.format("Library for {0} named {1} stored, {2} tracks, {3} playlists -- id {4}",
+                user,
+                library,
+                parsedLibrary.getTracks().size(),
+                parsedLibrary.getPlaylists().size(),
+                libraryId);
     }
 
     @RequestMapping("/{libraryId:\\d+}/upload")
     @ResponseBody
-    public String updateLibrary(@PathVariable long libraryId) {
-        return "library updated, library: " + libraryId;
+    public String updateLibrary(@PathVariable long libraryId,
+                                @RequestParam MultipartFile data) throws IOException {
+        MusicLibrary parsedLibrary = libraryStore.get(libraryId);
+        if(parsedLibrary == null) {
+            return MessageFormat.format("Library {0} does not exist",libraryId);
+        }
+
+        File storageFile = getLibraryFile(libraryId);
+        storageFile.delete();
+
+        ITunes itReader = new ITunes(); // not displaying columns
+        try {
+            parsedLibrary = itReader.read(data.getInputStream());
+        } catch (XMLStreamException e) {
+            // TODO move to errors directory, email karl
+            // TODO error checksum
+            return "There was an error parsing your library, the development team has been notified. Please wait for an email before resubmitting.";
+        }
+
+        data.transferTo(storageFile);
+
+        libraryStore.put(libraryId,parsedLibrary);
+
+        // look up or generate account and library ids, validate file and present link
+        return MessageFormat.format("Library updated, {2} tracks, {3} playlists -- id {4}",
+                null,
+                null,
+                parsedLibrary.getTracks().size(),
+                parsedLibrary.getPlaylists().size(),
+                libraryId);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, params = "q")
@@ -83,15 +166,13 @@ public class LibraryController {
     public String find(HttpServletRequest request,
                        @RequestParam String q) {
         String[] words = q.split("\\s+");
-        ArrayList<Map.Entry<String,MusicLibrary>> resultSet = new ArrayList<Map.Entry<String, MusicLibrary>>();
         ArrayList<String> names = new ArrayList<String>();
 
         nextLibrary:
-        for(Map.Entry<String,MusicLibrary> e : libraryStore.entrySet()) {
+        for(String name : libraryIds.keySet()) {
             for(String word : words ) {
-                if(e.getKey().contains(word)) {
-                    resultSet.add(e);
-                    names.add(e.getKey());
+                if(name.contains(word)) {
+                    names.add(name);
                     continue nextLibrary;
                 }
             }

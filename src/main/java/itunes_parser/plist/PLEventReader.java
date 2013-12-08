@@ -9,6 +9,7 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
+import java.io.InputStream;
 import java.io.Reader;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -76,6 +77,10 @@ public class PLEventReader extends AbstractIterator<PLEvent> {
 
     public PLEventReader(Reader rdr) throws XMLStreamException {
         this(XMLInputFactory.newInstance().createXMLEventReader(rdr));
+    }
+
+    public PLEventReader(InputStream is) throws XMLStreamException {
+        this(XMLInputFactory.newInstance().createXMLEventReader(is));
     }
 
     public PLEventReader(XMLEventReader xml) {

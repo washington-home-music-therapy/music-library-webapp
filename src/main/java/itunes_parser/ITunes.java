@@ -88,6 +88,16 @@ public final class ITunes {
         return library;
     }
 
+    public MusicLibrary read(InputStream is) throws XMLStreamException {
+        PLEventReader itr = new PLEventReader(is);
+
+        itr.seek(PLEventReader.State.START_PLIST,null, PLEventReader.State.START_DICT);
+
+        MusicLibrary library = PLUtil.readFrom(new MusicLibrary(), itr);
+
+        return library;
+    }
+
     public void printTo(MusicLibrary library, PrintWriter out) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         TreeSet<MusicTrack> tracks = new TreeSet<MusicTrack>(sort);
         tracks.addAll(library.getTracks().values());
