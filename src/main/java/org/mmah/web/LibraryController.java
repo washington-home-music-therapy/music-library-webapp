@@ -161,6 +161,22 @@ public class LibraryController {
                 libraryId);
     }
 
+    // provide search by artist column only
+    @RequestMapping(value = "", method = RequestMethod.GET, params = {"q","field=artist"})
+    @ResponseBody
+    public String findByArtist(HttpServletRequest request,
+                       @RequestParam String q) {
+        return null;
+    }
+
+    // provide search by title column only
+    @RequestMapping(value = "", method = RequestMethod.GET, params = {"q","field=title"})
+    @ResponseBody
+    public String findByTitle(HttpServletRequest request,
+                               @RequestParam String q) {
+        return null;
+    }
+
     @RequestMapping(value = "", method = RequestMethod.GET, params = "q")
     @ResponseBody
     public String find(HttpServletRequest request,
@@ -179,5 +195,88 @@ public class LibraryController {
         }
 
         return names.isEmpty()?"No results found":"Found libraries " + names;
+    }
+
+    /*
+    roots
+    classical
+    traditional
+    spiritual
+    other
+    popular
+    r&b / rock
+     */
+    @RequestMapping("/{libraryId:\\d+}/group")
+    @ResponseBody
+    public String showGroupSummary() {
+        return null;
+    }
+
+    /*
+    subgroups:
+
+    classical
+        orchestra
+        vocal
+        instrumentalist
+        opera
+
+    other
+        world
+        nature
+        instrumental
+        spoken / audio
+
+    popular
+        vocals
+        vocals male
+        vocals female
+        soundtrack
+        orchestra
+        pop
+        sing-a-long
+        romance
+
+    patriotic
+
+    r&b / rock
+        r&b 1947-1974
+        r&b 1974+
+        rock 1954-1963
+        rock 1963-1973
+        rock 1974+
+        r&b soul
+
+    roots
+        jazz
+        jazz big-band
+        blues
+
+    spiritual
+        contemporary spiritual
+        holiday
+        gospel
+        hymns moravian
+        hymns lutheran
+
+    traditional
+        country western
+        country bluegrass
+        country contemporary
+        country classic
+        country cowboy
+        country & folk traditional
+     */
+
+    @RequestMapping(value = "/{libraryId:\\d+}/genre", params = "group")
+    @ResponseBody
+    public String showGenres() {
+        return null;
+    }
+
+    @RequestMapping("/{libraryId:\\d+}/artist")
+    @ResponseBody
+    public String showArtists() {
+        return null;
     }
 }
