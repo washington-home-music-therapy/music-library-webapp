@@ -4,12 +4,12 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import itunes_parser.ITunes;
 import itunes_parser.itunes.MusicLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import itunes_parser.ITunes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.stream.XMLStreamException;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -97,15 +96,16 @@ public class LibraryController {
         return new File(dataDir,id + ".xml");
     }
 
-    @RequestMapping("/{libraryId:\\d+}/")
+    @RequestMapping(value = "/{libraryId:\\d+}/", produces = "application/json")
+    @ResponseBody
+    public MusicLibrary viewLibraryJson(@PathVariable long libraryId) throws FileNotFoundException, XMLStreamException {
+        return loadLibrary(libraryId);
+    }
+
+    @RequestMapping(value = "/{libraryId:\\d+}/", produces = "text/plain")
     @ResponseBody
     public String viewLibrary(@PathVariable long libraryId) throws FileNotFoundException, XMLStreamException {
-        MusicLibrary parsedLibrary = libraryStore.get(libraryId);
-        if(parsedLibrary == null) {
-            File storageFile = getLibraryFile(libraryId);
-            ITunes itReader = new ITunes(); // not displaying columns
-            parsedLibrary = itReader.read(storageFile);
-        }
+        MusicLibrary parsedLibrary = loadLibrary(libraryId);
 
         String key = libraryIds.inverse().get(libraryId);
 
@@ -125,6 +125,16 @@ public class LibraryController {
                 parsedLibrary.getTracks().size(),
                 parsedLibrary.getPlaylists().size(),
                 libraryId);
+    }
+
+    protected MusicLibrary loadLibrary(long libraryId) throws FileNotFoundException, XMLStreamException {
+        MusicLibrary parsedLibrary =  libraryStore.get(libraryId);
+        if(parsedLibrary == null) {
+            File storageFile = getLibraryFile(libraryId);
+            ITunes itReader = new ITunes(); // not displaying columns
+            parsedLibrary = itReader.read(storageFile);
+        }
+        return parsedLibrary;
     }
 
     @RequestMapping("/{libraryId:\\d+}/upload")

@@ -1,12 +1,12 @@
 package itunes_parser;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.beanutils.BeanUtils;
 import itunes_parser.bean.BeanPropertyComparator;
 import itunes_parser.itunes.MusicLibrary;
 import itunes_parser.itunes.MusicTrack;
 import itunes_parser.plist.PLEventReader;
 import itunes_parser.plist.PLUtil;
+import org.apache.commons.beanutils.BeanUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;

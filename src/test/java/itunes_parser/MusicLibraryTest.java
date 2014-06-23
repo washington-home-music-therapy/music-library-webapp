@@ -3,13 +3,14 @@ package itunes_parser;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import itunes_parser.bean.BeanPropertyComparator;
+import itunes_parser.itunes.MusicLibrary;
+import itunes_parser.itunes.MusicTrack;
+import itunes_parser.plist.PLEventReader;
+import itunes_parser.plist.PLUtil;
 import org.apache.commons.beanutils.BeanUtils;
 import org.junit.Ignore;
 import org.junit.Test;
-import itunes_parser.bean.BeanPropertyComparator;
-import itunes_parser.itunes.*;
-import itunes_parser.plist.PLEventReader;
-import itunes_parser.plist.PLUtil;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.FileNotFoundException;
