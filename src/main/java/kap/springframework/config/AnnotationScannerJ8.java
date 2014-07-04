@@ -15,9 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Provides classpath scanning for a subset of annotated types.
- *
- * @see org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
+ * Java 8 lambda/stream annotation scanner impl. Logs and continues when encountering classloading errors.
  */
 public class AnnotationScannerJ8 extends ClassPathScanningCandidateComponentProvider implements AnnotationScanner {
 
@@ -69,7 +67,7 @@ public class AnnotationScannerJ8 extends ClassPathScanningCandidateComponentProv
     scanMap(String basePackage, final Function<Class<?>, K> keyMapper) {
 
         return stream(basePackage).collect(Collectors.toMap(
-                aClass -> keyMapper.apply(aClass),
+                keyMapper::apply,
                 java.util.function.Function.identity()));
     }
 

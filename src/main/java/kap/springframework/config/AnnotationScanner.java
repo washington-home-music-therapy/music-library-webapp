@@ -8,6 +8,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Provides classpath scanning for a subset of annotated types.
+ *
+ * @see org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
+ */
 public interface AnnotationScanner {
 
     void addType(Class<? extends Annotation> annotationClass);

@@ -16,9 +16,7 @@ import java.util.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides classpath scanning for a subset of annotated types.
- *
- * @see org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
+ * Java 7 / Guava annotation scanner impl. Fail-fast classloading.
  */
 public class AnnotationScannerJ7 extends ClassPathScanningCandidateComponentProvider implements AnnotationScanner {
 
@@ -67,12 +65,14 @@ public class AnnotationScannerJ7 extends ClassPathScanningCandidateComponentProv
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <K> Map<K, Class<?>> scanMap(String basePackage, final Function<Class<?>, K> keyMapper) {
 
         return Maps.uniqueIndex(findClasses(basePackage), (Function)keyMapper);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <K> Map<K, Collection<Class<?>>>
     scanMultiMap(String basePackage,
                  Function<Class<?>, K> keyMapper) {
