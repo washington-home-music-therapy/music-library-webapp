@@ -31,7 +31,7 @@ public class MusicLibraryTest {
     @Test
     @Ignore
     public void testParseLibrary() throws FileNotFoundException, XMLStreamException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        PLEventReader itr = new PLEventReader(new FileReader("Larry's iTunes Library.xml")); //));
+        PLEventReader itr = new PLEventReader(new FileReader("src/test/resources/iTunes Music Library.xml")); //));
 
         itr.seek(PLEventReader.State.START_PLIST,null, PLEventReader.State.START_DICT);
 

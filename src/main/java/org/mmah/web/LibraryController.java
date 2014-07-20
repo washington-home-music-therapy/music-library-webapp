@@ -96,7 +96,7 @@ public class LibraryController {
         return new File(dataDir,id + ".xml");
     }
 
-    @RequestMapping(value = "/{libraryId:\\d+}/", produces = "application/json")
+    @RequestMapping(value = "/{libraryId:\\d+}/data", produces = "application/json")
     @ResponseBody
     public MusicLibrary viewLibraryJson(@PathVariable long libraryId) throws FileNotFoundException, XMLStreamException {
         return loadLibrary(libraryId);

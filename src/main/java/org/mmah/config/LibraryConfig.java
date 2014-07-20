@@ -1,5 +1,6 @@
 package org.mmah.config;
 
+import org.mmah.web.LibraryController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -30,5 +31,10 @@ public class LibraryConfig {
         SecureRandom sr =  new SecureRandom();
         sr.setSeed(sr.generateSeed(8));
         return sr;
+    }
+
+    @Bean
+    public LibraryController libraryController() {
+        return new LibraryController();
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import itunes_parser.itunes.MusicLibrary;
 import kap.jackson.config.JsonModel;
+import kap.jackson.config.Where;
 
 import java.util.Date;
 import java.util.List;

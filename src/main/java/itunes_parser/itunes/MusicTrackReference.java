@@ -14,6 +14,6 @@ public class MusicTrackReference {
     private int trackId;
 
     public MusicTrack getTrack(MusicLibrary library) {
-        return library.getTracks().get(trackId);
+        return library.getTracks().get(String.valueOf(trackId));
     }
 }
