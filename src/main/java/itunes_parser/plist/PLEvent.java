@@ -31,6 +31,11 @@ public class PLEvent {
             switch(state) {
                 case BOOLEAN:
                     return PLUtil.parse("boolean",getXml().get(0).asStartElement().getName().getLocalPart());
+                case STRING:
+                    List<XMLEvent> events = getXml();
+                    events = events.subList(1,events.size()-1);
+                    return events.stream().map(Object::toString).reduce(new StringBuilder(),
+                            (sb,s)-> { sb.append(s); return sb; }, (l,r) -> l.append(r)).toString();
                 default:
                     return PLUtil.parse(asType(),getXml().get(1).toString());
             }

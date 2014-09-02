@@ -28,6 +28,8 @@ import static javax.xml.stream.XMLStreamConstants.*;
  * To change this template use File | Settings | File Templates.
  */
 public class PLEventReader extends AbstractIterator<PLEvent> {
+    public static final boolean[] repeatable = new boolean[ENTITY_DECLARATION + 1];
+
     public static enum State {
         START_PLIST(START_ELEMENT,"plist"),
         END_PLIST(END_ELEMENT,"plist"),
@@ -70,9 +72,11 @@ public class PLEventReader extends AbstractIterator<PLEvent> {
                 default:
             }
         }
-    }
 
-    private State state = null;
+        repeatable[CHARACTERS] = true;
+        repeatable[SPACE] = true;
+        repeatable[CDATA] = true;
+    }
 
     @Setter
     @Getter
@@ -142,12 +146,19 @@ public class PLEventReader extends AbstractIterator<PLEvent> {
             List<XMLEvent> events = new ArrayList<XMLEvent>();
             events.add(event);
 
+            int currentType = event.getEventType();
             for(int i = 0; i < state.tail.length; i++) {
+                event = xml.nextEvent();
+
                 while(event.getEventType() != state.tail[i]) {
+                    if(repeatable[currentType] && event.getEventType() == currentType) {
+                        events.add(event);
+                    }
                     event = xml.nextEvent();
                 }
 
                 events.add(event);
+                currentType = event.getEventType();
             }
 
             return new PLEvent(state, ImmutableList.copyOf(events));
